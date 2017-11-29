@@ -112,6 +112,26 @@ pipeline {
             }
           }
 
+          // snapdragon (posix + qurt)
+          for (def option in ["eagle_default"]) {
+            def node_name = "${option}"
+
+            builds["${node_name}"] = {
+              node {
+                stage("Build Test ${node_name}") {
+                  docker.image('lorenzmeier/px4-dev-snapdragon:2017-10-23').inside("--env CCACHE_DIR=/tmp/ccache --volume=/tmp/ccache:/tmp/ccache:rw --env CI=true") {
+                    stage("${node_name}") {
+                      checkout scm
+                      sh "make clean"
+                      sh "make ${node_name}"
+                      sh "ccache -s"
+                    }
+                  }
+                }
+              }
+            }
+          }
+
           parallel builds
         }
       }
