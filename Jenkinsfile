@@ -132,6 +132,7 @@ pipeline {
             }
           }
 
+          builds.failFast = true
           parallel builds
         }
       }
