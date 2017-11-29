@@ -231,7 +231,10 @@ void VtolType::check_quadchute_condition()
 			float altErr = 0.0f;
 
 			if (_tecs_running) {
-				altErr = _tecs_status->altitudeSp - _tecs_status->altitude_filtered;
+				// are we dropping while requesting significant ascend?
+				if (_tecs_status->flightPathAngle < -1.0f && _tecs_status->flightPathAngleSp > 1.0f) {
+					altErr = _tecs_status->altitudeSp - _tecs_status->altitude_filtered;
+				}
 
 			} else {
 				altErr = -_local_pos_sp->z - -_local_pos->z;
@@ -241,7 +244,8 @@ void VtolType::check_quadchute_condition()
 				}
 			}
 
-			if (altErr > _params->fw_alt_err) {
+			// trigger when altitude error too large and vehicle is descending
+			if (altErr > _params->fw_alt_err && _local_pos->vz > 0.1f) {
 				_attc->abort_front_transition("QuadChute: Altitude error too large");
 			}
 		}
